@@ -19,14 +19,9 @@ Allows you to create a central `my-stack-playbook` repo. Linked into every proje
 git clone https://github.com/yourusername/dh-cli.git
 cd dh-cli
 npm install
-npm link
-
-
-# In your dh-cli folder
-
-npm install
 npm link # makes `dh` command available globally
 
+# In your working repo``
 dh init → sets up submodule + adds note to AGENTS.md
 dh new-pattern drizzle-transaction → creates ready markdown
 dh update

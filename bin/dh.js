@@ -8,7 +8,7 @@ const path = require("path");
 const DOC_HUB_REPO =
   process.env.DOC_HUB_REPO ||
   "https://github.com/yourusername/my-stack-playbook.git";
-const DEFAULT_DOCH_DIR = "doch";
+const DEFAULT_DIR = ".documents";
 
 function run(cmd) {
   console.log(`→ ${cmd}`);
@@ -17,64 +17,97 @@ function run(cmd) {
 
 program
   .name("dh")
-  .description("Sparse Document Hub CLI for your stack playbook")
-  .version("0.1.0");
+  .description("Sparse Document Hub CLI — .documents playbook manager")
+  .version("0.2.0");
 
 program
   .command("init")
-  .description("Initialize dochub submodule")
-  .option("-d, --dir <name>", "Directory name", DEFAULT_DOCH_DIR)
+  .description("Initialize .documents submodule")
+  .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .option("-r, --repo <url>", "Hub repo URL", DOC_HUB_REPO)
   .action((options) => {
     const dir = options.dir;
     const repo = options.repo;
 
     if (fs.existsSync(dir)) {
-      console.error(`❌ ${dir}/ already exists`);
+      console.error(`❌ ${dir} already exists`);
       process.exit(1);
     }
 
-    console.log(`🔧 Adding dochub → ${dir}`);
-    run(`git submodule add --name dochub ${repo} ${dir}`);
+    console.log(`🔧 Adding document hub → ${dir}`);
+    run(`git submodule add --name documents ${repo} ${dir}`);
 
-    // Add simple instructions to AGENTS.md (create if missing)
+    // Add instructions to AGENTS.md
     const agentsPath = "AGENTS.md";
-    let agentsContent = fs.existsSync(agentsPath)
+    let content = fs.existsSync(agentsPath)
       ? fs.readFileSync(agentsPath, "utf8")
       : "# AI Agents & Context\n\n";
 
-    const instructions = `\n## Document Hub\nUse \`dh update\` to pull latest playbook.\nUse \`dh contribute "msg"\` to push new patterns back.\nAll shared knowledge lives in \`./${dir}/\`.`;
+    const section = `\n## Document Hub\nUse \`dh update\` or \`dh sync "message"\`.\nAll shared knowledge & playbook lives in \`./${dir}/\`.`;
 
-    if (!agentsContent.includes("Document Hub")) {
-      fs.writeFileSync(agentsPath, agentsContent.trim() + instructions);
+    if (!content.includes("Document Hub")) {
+      fs.writeFileSync(agentsPath, content.trim() + section);
       console.log("✅ Added Document Hub section to AGENTS.md");
     }
 
-    console.log("✅ Init complete!");
-    console.log(`   git commit -m "chore: add dochub"`);
+    console.log("✅ .documents initialized");
+    console.log('   git commit -m "chore: add .documents hub"');
   });
 
 program
   .command("update")
-  .description("Pull latest from hub")
-  .option("-d, --dir <name>", "Directory name", DEFAULT_DOCH_DIR)
+  .description("Pull latest from .documents hub")
+  .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((options) => {
     run(`git submodule update --remote --merge ${options.dir}`);
-    console.log(`✅ Updated ${options.dir}/`);
+    console.log(`✅ Updated ${options.dir}`);
+  });
+
+program
+  .command("sync")
+  .description(
+    "Update from hub + contribute changes back (like your git alias)",
+  )
+  .argument("[message]", "Commit message", "sync: update from project")
+  .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
+  .action((message, options) => {
+    const dir = options.dir;
+
+    if (!fs.existsSync(path.join(dir, ".git"))) {
+      console.error(`❌ ${dir} is not a valid submodule`);
+      process.exit(1);
+    }
+
+    console.log("--- Updating from remote ---");
+    run(`git submodule update --remote --merge ${dir}`);
+
+    console.log("--- Committing changes in hub ---");
+    process.chdir(dir);
+    run("git add -A");
+    try {
+      run(`git commit -m "${message}"`);
+    } catch (e) {
+      console.log("→ No changes to commit");
+    }
+    run("git push origin main"); // Change branch if needed
+
+    console.log("--- Updating parent repo pointer ---");
+    process.chdir("..");
+    run(`git add ${dir}`);
+    run(`git commit -m "chore(docs): update .documents pointer (${message})"`);
+    run("git push");
+
+    console.log("✅ Sync complete");
   });
 
 program
   .command("contribute")
-  .description("Push changes back to hub")
-  .argument("[message]", "Commit message", "Update from project")
-  .option("-d, --dir <name>", "Directory name", DEFAULT_DOCH_DIR)
+  .description("Only push changes back (without pulling first)")
+  .argument("[message]", "Commit message", "update from project")
+  .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((message, options) => {
+    // Same logic as sync but without update step
     const dir = options.dir;
-    if (!fs.existsSync(path.join(dir, ".git"))) {
-      console.error(`❌ ${dir}/ is not a submodule`);
-      process.exit(1);
-    }
-
     process.chdir(dir);
     run("git add -A");
     try {
@@ -82,24 +115,23 @@ program
     } catch (e) {
       console.log("→ No changes");
     }
-    run("git push origin main"); // ← change if you use different default branch
+    run("git push origin main");
 
     process.chdir("..");
     run(`git add ${dir}`);
-    run(`git commit -m "chore(docs): update hub (${message})"`);
+    run(`git commit -m "chore(docs): update .documents (${message})"`);
     run("git push");
 
-    console.log("✅ Contributed to hub");
+    console.log("✅ Contributed");
   });
 
 program
   .command("new-pattern")
-  .description("Create new pattern file in doch/patterns/")
+  .description("Create new pattern in .documents/patterns/")
   .argument("<name>", "Pattern name (kebab-case)")
-  .option("-d, --dir <name>", "Directory name", DEFAULT_DOCH_DIR)
+  .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((name, options) => {
-    const dir = options.dir;
-    const patternsDir = path.join(dir, "patterns");
+    const patternsDir = path.join(options.dir, "patterns");
     if (!fs.existsSync(patternsDir))
       fs.mkdirSync(patternsDir, { recursive: true });
 
@@ -108,14 +140,13 @@ program
 
     fs.writeFileSync(filePath, template);
     console.log(`✅ Created ${filePath}`);
-    console.log(`   cd ${dir} && code patterns/${name}.md`); // or your editor
   });
 
 program
   .command("search")
-  .description("Simple grep search in doch/")
+  .description("Search inside .documents")
   .argument("<query>", "Search term")
-  .option("-d, --dir <name>", "Directory name", DEFAULT_DOCH_DIR)
+  .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((query, options) => {
     try {
       const result = execSync(
