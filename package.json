@@ -1,6 +1,6 @@
 {
   "name": "dh",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "description": "Document Hub CLI — beads-style docs & playbook manager",
   "main": "index.js",
   "bin": {
