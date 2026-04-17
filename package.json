@@ -1,8 +1,7 @@
 {
   "name": "@ubuntupunk/dh",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Document Hub CLI — repo level docuhub & playbook manager",
-  "main": "index.js",
   "bin": {
     "dh": "bin/dh.js"
   },
@@ -15,7 +14,8 @@
     "playbook",
     "documentation",
     "cli",
-    "knowledge-base"
+    "knowledge-base",
+    "agent"
   ],
   "publishConfig": {
     "access": "public"
