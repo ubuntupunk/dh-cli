@@ -28,11 +28,13 @@ npm install -g @ubuntupunk/dh
 
 # In your working repo
 
+```bash
 dh init → sets up submodule + adds note to AGENTS.md
 dh add-pattern foo → creates markdown with .md suffix, no need to add it.
 dh sync
 dh contribute "new setup"
 dh search foo
+```
 
 # Set once in ~/.zshrc / ~/.bashrc
 
