@@ -27,7 +27,7 @@ function hasRemote() {
 program
   .name("dh")
   .description("Sparse Document Hub CLI — .documents playbook manager")
-  .version("0.2.2");
+  .version("0.2.3");
 
 program
   .command("init")
@@ -55,13 +55,13 @@ program
     const agentsPath = "AGENTS.md";
     let content = fs.existsSync(agentsPath)
       ? fs.readFileSync(agentsPath, "utf8")
-      : "# AI Agents & Context\n\n";
+      : "";
 
-    const section = `\n## Document Hub\nUse \`dh update\` or \`dh sync "message"\`.\nAll shared knowledge & playbook lives in \`./${dir}/\`.`;
+    const section = `\n#DocuHub\nUse \`dh update\` or \`dh sync "message"\`.\nAll shared knowledge & playbook lives in \`./${dir}/\`.`;
 
-    if (!content.includes("Document Hub")) {
+    if (!content.includes("DocuHub")) {
       fs.writeFileSync(agentsPath, content.trim() + section);
-      console.log("Added Document Hub section to AGENTS.md");
+      console.log("Added DocuHub section to AGENTS.md");
     }
 
     console.log(".documents initialized");
