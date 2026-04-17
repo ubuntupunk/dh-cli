@@ -17,7 +17,7 @@ Allow agents to edit documents in .documents/ and use `dh sync` to keep the cent
 
 ```bash
 # Install globally from npm
-npm install -g dh
+npm install -g @ubuntupunk/dh
 ```
 
 # In your working repo``

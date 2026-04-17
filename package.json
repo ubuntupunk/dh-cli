@@ -1,5 +1,5 @@
 {
-  "name": "dh",
+  "name": "@ubuntupunk/dh",
   "version": "0.2.2",
   "description": "Document Hub CLI — beads-style docs & playbook manager",
   "main": "index.js",
