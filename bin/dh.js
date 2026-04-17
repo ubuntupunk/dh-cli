@@ -24,10 +24,40 @@ function hasRemote() {
   }
 }
 
+function ensureProjectRoot(dir) {
+  let cwd = process.cwd();
+
+  // === Smart location detection ===
+  if (fs.existsSync(path.join(cwd, dir, ".git"))) {
+    // Correct: We are in project root
+    console.log(`Running from project root`);
+  } else if (fs.existsSync(path.join(cwd, ".git"))) {
+    // We are inside .documents → go up
+    console.log(`Detected inside submodule, moving to parent`);
+    process.chdir("..");
+    cwd = process.cwd();
+  } else {
+    console.error(`Not in a valid git project (no .git found)`);
+    process.exit(1);
+  }
+
+  // Final safety checks
+  if (!fs.existsSync(".git")) {
+    console.error(`Not in git repository root`);
+    process.exit(1);
+  }
+  if (!fs.existsSync(path.join(dir, ".git"))) {
+    console.error(`${dir} is not a valid submodule`);
+    process.exit(1);
+  }
+
+  return cwd;
+}
+
 program
   .name("dh")
   .description("Sparse Document Hub CLI — .documents playbook manager")
-  .version("0.2.4");
+  .version("0.2.5");
 
 program
   .command("init")
@@ -74,31 +104,7 @@ program
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((options) => {
     const dir = options.dir;
-    let cwd = process.cwd();
-
-    // === Smart location detection ===
-    if (fs.existsSync(path.join(cwd, dir, ".git"))) {
-      // Correct: We are in project root
-      console.log(`Running from project root`);
-    } else if (fs.existsSync(path.join(cwd, ".git"))) {
-      // We are inside .documents → go up
-      console.log(`Detected inside submodule, moving to parent`);
-      process.chdir("..");
-      cwd = process.cwd();
-    } else {
-      console.error(`Not in a valid git project (no .git found)`);
-      process.exit(1);
-    }
-
-    // Final safety check
-    if (!fs.existsSync(".git")) {
-      console.error(`Not in git repository root`);
-      process.exit(1);
-    }
-    if (!fs.existsSync(path.join(dir, ".git"))) {
-      console.error(`${dir} is not a valid submodule`);
-      process.exit(1);
-    }
+    ensureProjectRoot(dir);
 
     console.log("--- Updating from remote ---");
     run(`git submodule update --remote --merge ${dir}`);
@@ -112,31 +118,7 @@ program
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((message, options) => {
     const dir = options.dir;
-    let cwd = process.cwd(); // ← Important: declare here
-
-    // === Smart location detection ===
-    if (fs.existsSync(path.join(cwd, dir, ".git"))) {
-      // Correct: We are in project root
-      console.log(`Running from project root`);
-    } else if (fs.existsSync(path.join(cwd, ".git"))) {
-      // We are inside .documents → go up
-      console.log(`Detected inside submodule, moving to parent`);
-      process.chdir("..");
-      cwd = process.cwd();
-    } else {
-      console.error(`Not in a valid git project (no .git found)`);
-      process.exit(1);
-    }
-
-    // Final safety check
-    if (!fs.existsSync(".git")) {
-      console.error(`Not in git repository root`);
-      process.exit(1);
-    }
-    if (!fs.existsSync(path.join(dir, ".git"))) {
-      console.error(`${dir} is not a valid submodule`);
-      process.exit(1);
-    }
+    const cwd = ensureProjectRoot(dir);
 
     console.log("--- Updating from remote ---");
     run(`git submodule update --remote --merge ${dir}`);
@@ -187,26 +169,7 @@ program
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((message, options) => {
     const dir = options.dir;
-    let cwd = process.cwd();
-
-    // === Smart location detection ===
-    if (fs.existsSync(path.join(cwd, dir, ".git"))) {
-      // We are in project root → perfect
-      console.log(`Running from project root`);
-    } else if (fs.existsSync(path.join(cwd, ".git"))) {
-      // We are inside .documents → go up one level
-      console.log(`Detected inside submodule, moving to parent`);
-      process.chdir("..");
-      cwd = process.cwd();
-    } else {
-      console.error(`Not in a valid project (no .git found)`);
-      process.exit(1);
-    }
-
-    if (!fs.existsSync(".git")) {
-      console.error(`Not in git repository root`);
-      process.exit(1);
-    }
+    const cwd = ensureProjectRoot(dir);
 
     console.log(`Contributing changes from .documents`);
 
