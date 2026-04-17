@@ -31,24 +31,24 @@ program
 
 program
   .command("init")
-  .description("Initialize .documents submodule")
+  .description("Initialize document hub submodule and AGENTS.md instructions")
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
-  .option("-r, --repo <url>", "Hub repo URL", DOC_HUB_REPO)
+  .option("-r, --repo <url>", "Hub repository URL", DOC_HUB_REPO)
   .action((options) => {
     const dir = options.dir;
     const repo = options.repo;
 
     if (!fs.existsSync(".git")) {
-      console.error("❌ Not a git repository. Please run `git init` first.");
+      console.error("Not a git repository. Please run `git init` first.");
       process.exit(1);
     }
 
     if (fs.existsSync(dir)) {
-      console.error(`❌ ${dir} already exists`);
+      console.error(`${dir} already exists`);
       process.exit(1);
     }
 
-    console.log(`🔧 Adding document hub → ${dir}`);
+    console.log(`Adding document hub -> ${dir}`);
     run(`git submodule add --name documents ${repo} ${dir}`);
 
     // Add instructions to AGENTS.md
@@ -61,25 +61,25 @@ program
 
     if (!content.includes("Document Hub")) {
       fs.writeFileSync(agentsPath, content.trim() + section);
-      console.log("✅ Added Document Hub section to AGENTS.md");
+      console.log("Added Document Hub section to AGENTS.md");
     }
 
-    console.log("✅ .documents initialized");
+    console.log(".documents initialized");
     console.log('   git commit -m "chore: add .documents hub"');
   });
 
 program
   .command("update")
-  .description("Pull latest from .documents hub")
+  .description("Pull latest changes from remote hub")
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((options) => {
     run(`git submodule update --remote --merge ${options.dir}`);
-    console.log(`✅ Updated ${options.dir}`);
+    console.log(`Updated ${options.dir}`);
   });
 
 program
   .command("sync")
-  .description("Update from hub + contribute changes back")
+  .description("Pull updates, commit local changes, and push to hub")
   .argument("[message]", "Commit message", "sync: update from project")
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((message, options) => {
@@ -89,24 +89,24 @@ program
     // === Smart location detection ===
     if (fs.existsSync(path.join(cwd, dir, ".git"))) {
       // Correct: We are in project root
-      console.log(`📍 Running from project root`);
+      console.log(`Running from project root`);
     } else if (fs.existsSync(path.join(cwd, ".git"))) {
       // We are inside .documents → go up
-      console.log(`→ Detected inside submodule, moving to parent`);
+      console.log(`Detected inside submodule, moving to parent`);
       process.chdir("..");
       cwd = process.cwd();
     } else {
-      console.error(`❌ Not in a valid git project (no .git found)`);
+      console.error(`Not in a valid git project (no .git found)`);
       process.exit(1);
     }
 
     // Final safety check
     if (!fs.existsSync(".git")) {
-      console.error(`❌ Not in git repository root`);
+      console.error(`Not in git repository root`);
       process.exit(1);
     }
     if (!fs.existsSync(path.join(dir, ".git"))) {
-      console.error(`❌ ${dir} is not a valid submodule`);
+      console.error(`${dir} is not a valid submodule`);
       process.exit(1);
     }
 
@@ -119,7 +119,7 @@ program
     try {
       run(`git commit -m "${message}"`);
     } catch (e) {
-      console.log("→ No changes in submodule");
+      console.log("No changes in submodule");
     }
     run("git push origin main");
 
@@ -133,28 +133,28 @@ program
         `git commit -m "chore(docs): update .documents pointer (${message})"`,
       );
     } catch (e) {
-      console.log("→ No changes to parent commit");
+      console.log("No changes to parent commit");
     }
 
     // Smart push handling for parent repo
     if (hasRemote()) {
       try {
         run("git push");
-        console.log("✅ Parent repo pointer pushed");
+        console.log("Parent repo pointer pushed");
       } catch (e) {
-        console.warn("\n⚠️  Failed to push parent repo pointer. Submodule is synced, but parent history is local.");
+        console.warn("\nFailed to push parent repo pointer. Submodule is synced, but parent history is local.");
       }
     } else {
-      console.log("\nℹ️  Skipping parent push: No remote configured.");
+      console.log("\nSkipping parent push: No remote configured.");
       console.log("   (Submodule was successfully updated and pushed)");
     }
 
-    console.log("\n✨ Sync complete");
+    console.log("\nSync complete");
   });
 
 program
   .command("contribute")
-  .description("Push changes back to hub")
+  .description("Commit local changes and push to hub without pulling first")
   .argument("[message]", "Commit message", "update from project")
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((message, options) => {
@@ -164,23 +164,23 @@ program
     // === Smart location detection ===
     if (fs.existsSync(path.join(cwd, dir, ".git"))) {
       // We are in project root → perfect
-      console.log(`📍 Running from project root`);
+      console.log(`Running from project root`);
     } else if (fs.existsSync(path.join(cwd, ".git"))) {
       // We are inside .documents → go up one level
-      console.log(`→ Detected inside submodule, moving to parent`);
+      console.log(`Detected inside submodule, moving to parent`);
       process.chdir("..");
       cwd = process.cwd();
     } else {
-      console.error(`❌ Not in a valid project (no .git found)`);
+      console.error(`Not in a valid project (no .git found)`);
       process.exit(1);
     }
 
     if (!fs.existsSync(".git")) {
-      console.error(`❌ Not in git repository root`);
+      console.error(`Not in git repository root`);
       process.exit(1);
     }
 
-    console.log(`📤 Contributing changes from .documents`);
+    console.log(`Contributing changes from .documents`);
 
     // 1. Work inside the submodule
     process.chdir(dir);
@@ -188,7 +188,7 @@ program
     try {
       run(`git commit -m "${message}"`);
     } catch (e) {
-      console.log("→ No changes to commit in .documents");
+      console.log("No changes to commit in .documents");
     }
     run("git push origin main");
 
@@ -198,28 +198,28 @@ program
     try {
       run(`git commit -m "chore(docs): update .documents (${message})"`);
     } catch (e) {
-      console.log("→ No changes to parent commit");
+      console.log("No changes to parent commit");
     }
 
     // Smart push handling for parent repo
     if (hasRemote()) {
       try {
         run("git push");
-        console.log("✅ Parent repo pointer updated");
+        console.log("Parent repo pointer updated");
       } catch (e) {
-        console.warn("\n⚠️  Failed to push parent repo pointer. Hub was updated, but parent history is local.");
+        console.warn("\nFailed to push parent repo pointer. Hub was updated, but parent history is local.");
       }
     } else {
-      console.log("\nℹ️  Skipping parent push: No remote configured.");
+      console.log("\nSkipping parent push: No remote configured.");
       console.log("   (Document Hub was successfully updated and pushed)");
     }
 
-    console.log("\n✨ Successfully contributed to document hub");
+    console.log("\nSuccessfully contributed to document hub");
   });
 
 program
-  .command("new-pattern")
-  .description("Create new pattern in .documents/patterns/")
+  .command("add-pattern")
+  .description("Create a new markdown template in patterns/")
   .argument("<name>", "Pattern name (kebab-case)")
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((name, options) => {
@@ -231,12 +231,12 @@ program
     const template = `# ${name.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}\n\n## Context\n\n## Solution\n\n## Example\n\n`;
 
     fs.writeFileSync(filePath, template);
-    console.log(`✅ Created ${filePath}`);
+    console.log(`Created ${filePath}`);
   });
 
 program
   .command("search")
-  .description("Search inside .documents")
+  .description("Search all markdown files in the document hub")
   .argument("<query>", "Search term")
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((query, options) => {

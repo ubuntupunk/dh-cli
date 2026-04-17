@@ -3,6 +3,7 @@
 **Sparse Document Hub CLI** — repo level management for docs & personal playbook across projects.
 
 Allows you to create a central `my-stack-playbook` repo. Linked into every project via git submodule. Zero duplication.
+Edit documents in .documents/ and use `dh sync` to keep the central hub updated. Parent repository pointer updates are handled gracefully and do not require a remote.
 
 ## Features
 
@@ -23,7 +24,7 @@ npm link # makes `dh` command available globally
 
 # In your working repo``
 dh init → sets up submodule + adds note to AGENTS.md
-dh new-pattern drizzle-transaction → creates ready markdown
+dh add-pattern drizzle-transaction → creates ready markdown with .md suffix, no need to add it.
 dh update
 dh contribute "new pino setup"
 dh search drizzle
@@ -37,7 +38,7 @@ export DOC_HUB_REPO="https://github.com/yourusername/my-stack-playbook.git"
 Recommended Hub Structure (my-stack-playbook)
 
 ```text
-doch/
+.documents/
 ├── README.md
 ├── core/
 ├── patterns/          ← your top skills & solutions
