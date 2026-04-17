@@ -2,38 +2,37 @@
 
 **Sparse Document Hub CLI** — repo level management for docs & personal playbook across projects.
 
-Allows you to create a central `my-stack-playbook` repo. Linked into every project via git submodule. Zero duplication.
-Edit documents in .documents/ and use `dh sync` to keep the central hub updated. Parent repository pointer updates are handled gracefully and do not require a remote.
+Create a central `my-stack-playbook` or `my-docuhub` repo. Linked into every project via git submodule. Zero duplication.
+Allow agents to edit documents in .documents/ and use `dh sync` to keep the central hub updated. Parent repository pointer updates are handled gracefully and do not require a remote.
 
 ## Features
 
 - `dh init` — add the dochub submodule + AGENTS.md instructions
-- `dh update` — pull latest playbook
+- `dh sync` — update & pull latest playbook
 - `dh contribute` — push new patterns back to the hub
-- `dh new-pattern <name>` — create a new pattern template
-- `dh search <term>` — quick search across all docs
+- `dh search` - search your .documents using grep
+- `dh add-pattern <name>` — create a new pattern template
 
 ## Installation
 
 ```bash
-# Clone and install globally
-git clone https://github.com/yourusername/dh-cli.git
-cd dh-cli
-npm install
-npm link # makes `dh` command available globally
+# Install globally from npm
+npm install -g dh
+```
 
 # In your working repo``
+
 dh init → sets up submodule + adds note to AGENTS.md
-dh add-pattern drizzle-transaction → creates ready markdown with .md suffix, no need to add it.
-dh update
-dh contribute "new pino setup"
-dh search drizzle
+dh add-pattern foo → creates markdown with .md suffix, no need to add it.
+dh sync
+dh contribute "new setup"
+dh search foo
 
 # Set once in ~/.zshrc / ~/.bashrc
 
 export DOC_HUB_REPO="https://github.com/yourusername/my-stack-playbook.git"
 
-```
+````
 
 Recommended Hub Structure (my-stack-playbook)
 
@@ -45,7 +44,7 @@ Recommended Hub Structure (my-stack-playbook)
 ├── templates/
 ├── divergences/
 └── decisions/
-```
+````
 
 ## Why this exists
 
