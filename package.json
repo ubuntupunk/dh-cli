@@ -1,6 +1,6 @@
 {
   "name": "@ubuntupunk/dh",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Document Hub CLI — repo level docuhub & playbook manager",
   "bin": {
     "dh": "bin/dh.js"
@@ -23,5 +23,5 @@
   "dependencies": {
     "commander": "^13.0.0"
   },
-  "license": "MIT"
+  "license": "GPL-3.0-only"
 }
