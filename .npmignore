@@ -1,0 +1,6 @@
+.git/
+.gemini/
+pnpm-lock.yaml
+example.md
+.gitignore
+node_modules/

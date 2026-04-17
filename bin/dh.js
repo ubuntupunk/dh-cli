@@ -57,7 +57,7 @@ function ensureProjectRoot(dir) {
 program
   .name("dh")
   .description("Sparse Document Hub CLI — .documents playbook manager")
-  .version("0.2.5");
+  .version("0.2.6");
 
 program
   .command("init")
