@@ -31,14 +31,17 @@ program
 
 program
   .command("init")
-// ... (omitting init for brevity, but I will include it in the actual replace call if needed, 
-// though the instruction says "Add a helper function..." so I should be careful to only replace what's necessary)
   .description("Initialize .documents submodule")
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .option("-r, --repo <url>", "Hub repo URL", DOC_HUB_REPO)
   .action((options) => {
     const dir = options.dir;
     const repo = options.repo;
+
+    if (!fs.existsSync(".git")) {
+      console.error("❌ Not a git repository. Please run `git init` first.");
+      process.exit(1);
+    }
 
     if (fs.existsSync(dir)) {
       console.error(`❌ ${dir} already exists`);
