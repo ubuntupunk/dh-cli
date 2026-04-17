@@ -70,7 +70,27 @@ program
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((message, options) => {
     const dir = options.dir;
+    let cwd = process.cwd(); // ← Important: declare here
 
+    // === Smart location detection ===
+    if (fs.existsSync(path.join(cwd, dir, ".git"))) {
+      // Correct: We are in project root
+      console.log(`📍 Running from project root`);
+    } else if (fs.existsSync(path.join(cwd, ".git"))) {
+      // We are inside .documents → go up
+      console.log(`→ Detected inside submodule, moving to parent`);
+      process.chdir("..");
+      cwd = process.cwd();
+    } else {
+      console.error(`❌ Not in a valid git project (no .git found)`);
+      process.exit(1);
+    }
+
+    // Final safety check
+    if (!fs.existsSync(".git")) {
+      console.error(`❌ Not in git repository root`);
+      process.exit(1);
+    }
     if (!fs.existsSync(path.join(dir, ".git"))) {
       console.error(`❌ ${dir} is not a valid submodule`);
       process.exit(1);
@@ -80,7 +100,7 @@ program
     run(`git submodule update --remote --merge ${dir}`);
 
     console.log("--- Committing changes in .documents ---");
-    process.chdir(dir);
+    process.chdir(dir); // go into submodule
     run("git add -A");
     try {
       run(`git commit -m "${message}"`);
@@ -89,11 +109,11 @@ program
     }
     run("git push origin main");
 
-    process.chdir("..");
+    // Go back to project root
+    process.chdir(cwd);
 
     console.log("--- Updating parent repo pointer ---");
     run(`git add ${dir}`);
-
     try {
       run(
         `git commit -m "chore(docs): update .documents pointer (${message})"`,
@@ -102,14 +122,14 @@ program
       console.log("→ No changes to parent commit");
     }
 
-    // NEW: Smart push handling
+    // Smart push
     try {
       run("git push");
     } catch (e) {
       console.error("\n❌ Parent repo has no remote configured.");
-      console.log("   Fix with:");
-      console.log("   git remote add origin <your-repo-url>");
-      console.log("   git push -u origin main\n");
+      console.error("   Fix with:");
+      console.error("   git remote add origin <your-repo-url>");
+      console.error("   git push -u origin main\n");
       process.exit(1);
     }
 
@@ -118,31 +138,64 @@ program
 
 program
   .command("contribute")
-  .description("Push changes back to hub (without pulling)")
+  .description("Push changes back to hub")
   .argument("[message]", "Commit message", "update from project")
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((message, options) => {
     const dir = options.dir;
-    // ... same as before until the parent push ...
+    let cwd = process.cwd();
 
-    process.chdir("..");
+    // === Smart location detection ===
+    if (fs.existsSync(path.join(cwd, dir, ".git"))) {
+      // We are in project root → perfect
+      console.log(`📍 Running from project root`);
+    } else if (fs.existsSync(path.join(cwd, ".git"))) {
+      // We are inside .documents → go up one level
+      console.log(`→ Detected inside submodule, moving to parent`);
+      process.chdir("..");
+      cwd = process.cwd();
+    } else {
+      console.error(`❌ Not in a valid project (no .git found)`);
+      process.exit(1);
+    }
+
+    if (!fs.existsSync(".git")) {
+      console.error(`❌ Not in git repository root`);
+      process.exit(1);
+    }
+
+    console.log(`📤 Contributing changes from .documents`);
+
+    // 1. Work inside the submodule
+    process.chdir(dir);
+    run("git add -A");
+    try {
+      run(`git commit -m "${message}"`);
+    } catch (e) {
+      console.log("→ No changes to commit in .documents");
+    }
+    run("git push origin main");
+
+    // 2. Update parent repo
+    process.chdir(cwd); // go back to root
     run(`git add ${dir}`);
     try {
       run(`git commit -m "chore(docs): update .documents (${message})"`);
     } catch (e) {
-      console.log("→ No changes to parent");
+      console.log("→ No changes to parent commit");
     }
 
     try {
       run("git push");
     } catch (e) {
       console.error("\n❌ Parent repo has no remote configured.");
-      console.log("   Run: git remote add origin <your-repo-url>");
-      console.log("   Then: git push -u origin main");
+      console.error("   Fix with:");
+      console.error("   git remote add origin <your-repo-url>");
+      console.error("   git push -u origin main");
       process.exit(1);
     }
 
-    console.log("✅ Contributed");
+    console.log("✅ Successfully contributed to document hub");
   });
 
 program
