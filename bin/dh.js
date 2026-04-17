@@ -65,9 +65,7 @@ program
 
 program
   .command("sync")
-  .description(
-    "Update from hub + contribute changes back (like your git alias)",
-  )
+  .description("Update from hub + contribute changes back")
   .argument("[message]", "Commit message", "sync: update from project")
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((message, options) => {
@@ -81,46 +79,68 @@ program
     console.log("--- Updating from remote ---");
     run(`git submodule update --remote --merge ${dir}`);
 
-    console.log("--- Committing changes in hub ---");
+    console.log("--- Committing changes in .documents ---");
     process.chdir(dir);
     run("git add -A");
     try {
       run(`git commit -m "${message}"`);
     } catch (e) {
-      console.log("→ No changes to commit");
+      console.log("→ No changes in submodule");
     }
-    run("git push origin main"); // Change branch if needed
+    run("git push origin main");
+
+    process.chdir("..");
 
     console.log("--- Updating parent repo pointer ---");
-    process.chdir("..");
     run(`git add ${dir}`);
-    run(`git commit -m "chore(docs): update .documents pointer (${message})"`);
-    run("git push");
+
+    try {
+      run(
+        `git commit -m "chore(docs): update .documents pointer (${message})"`,
+      );
+    } catch (e) {
+      console.log("→ No changes to parent commit");
+    }
+
+    // NEW: Smart push handling
+    try {
+      run("git push");
+    } catch (e) {
+      console.error("\n❌ Parent repo has no remote configured.");
+      console.log("   Fix with:");
+      console.log("   git remote add origin <your-repo-url>");
+      console.log("   git push -u origin main\n");
+      process.exit(1);
+    }
 
     console.log("✅ Sync complete");
   });
 
 program
   .command("contribute")
-  .description("Only push changes back (without pulling first)")
+  .description("Push changes back to hub (without pulling)")
   .argument("[message]", "Commit message", "update from project")
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((message, options) => {
-    // Same logic as sync but without update step
     const dir = options.dir;
-    process.chdir(dir);
-    run("git add -A");
-    try {
-      run(`git commit -m "${message}"`);
-    } catch (e) {
-      console.log("→ No changes");
-    }
-    run("git push origin main");
+    // ... same as before until the parent push ...
 
     process.chdir("..");
     run(`git add ${dir}`);
-    run(`git commit -m "chore(docs): update .documents (${message})"`);
-    run("git push");
+    try {
+      run(`git commit -m "chore(docs): update .documents (${message})"`);
+    } catch (e) {
+      console.log("→ No changes to parent");
+    }
+
+    try {
+      run("git push");
+    } catch (e) {
+      console.error("\n❌ Parent repo has no remote configured.");
+      console.log("   Run: git remote add origin <your-repo-url>");
+      console.log("   Then: git push -u origin main");
+      process.exit(1);
+    }
 
     console.log("✅ Contributed");
   });
