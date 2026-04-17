@@ -27,7 +27,7 @@ function hasRemote() {
 program
   .name("dh")
   .description("Sparse Document Hub CLI — .documents playbook manager")
-  .version("0.2.1");
+  .version("0.2.2");
 
 program
   .command("init")
@@ -70,11 +70,39 @@ program
 
 program
   .command("update")
-  .description("Pull latest changes from remote hub")
+  .description("Pull latest changes from remote hub (non-destructive)")
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((options) => {
-    run(`git submodule update --remote --merge ${options.dir}`);
-    console.log(`Updated ${options.dir}`);
+    const dir = options.dir;
+    let cwd = process.cwd();
+
+    // === Smart location detection ===
+    if (fs.existsSync(path.join(cwd, dir, ".git"))) {
+      // Correct: We are in project root
+      console.log(`Running from project root`);
+    } else if (fs.existsSync(path.join(cwd, ".git"))) {
+      // We are inside .documents → go up
+      console.log(`Detected inside submodule, moving to parent`);
+      process.chdir("..");
+      cwd = process.cwd();
+    } else {
+      console.error(`Not in a valid git project (no .git found)`);
+      process.exit(1);
+    }
+
+    // Final safety check
+    if (!fs.existsSync(".git")) {
+      console.error(`Not in git repository root`);
+      process.exit(1);
+    }
+    if (!fs.existsSync(path.join(dir, ".git"))) {
+      console.error(`${dir} is not a valid submodule`);
+      process.exit(1);
+    }
+
+    console.log("--- Updating from remote ---");
+    run(`git submodule update --remote --merge ${dir}`);
+    console.log(`Updated ${dir}`);
   });
 
 program
