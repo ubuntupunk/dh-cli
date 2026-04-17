@@ -1,13 +1,24 @@
 {
   "name": "@ubuntupunk/dh",
   "version": "0.2.2",
-  "description": "Document Hub CLI — beads-style docs & playbook manager",
+  "description": "Document Hub CLI — repo level docuhub & playbook manager",
   "main": "index.js",
   "bin": {
     "dh": "bin/dh.js"
   },
   "scripts": {
     "link": "npm link"
+  },
+  "keywords": [
+    "git",
+    "submodule",
+    "playbook",
+    "documentation",
+    "cli",
+    "knowledge-base"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "commander": "^13.0.0"

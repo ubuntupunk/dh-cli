@@ -1,1 +1,4 @@
 node_modules
+.gemini/
+pnpm-lock.yaml
+example.md
