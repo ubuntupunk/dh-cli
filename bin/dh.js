@@ -15,13 +15,24 @@ function run(cmd) {
   execSync(cmd, { stdio: "inherit" });
 }
 
+function hasRemote() {
+  try {
+    const remotes = execSync("git remote", { encoding: "utf8" }).trim();
+    return remotes.length > 0;
+  } catch (e) {
+    return false;
+  }
+}
+
 program
   .name("dh")
   .description("Sparse Document Hub CLI — .documents playbook manager")
-  .version("0.2.0");
+  .version("0.2.1");
 
 program
   .command("init")
+// ... (omitting init for brevity, but I will include it in the actual replace call if needed, 
+// though the instruction says "Add a helper function..." so I should be careful to only replace what's necessary)
   .description("Initialize .documents submodule")
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .option("-r, --repo <url>", "Hub repo URL", DOC_HUB_REPO)
@@ -122,18 +133,20 @@ program
       console.log("→ No changes to parent commit");
     }
 
-    // Smart push
-    try {
-      run("git push");
-    } catch (e) {
-      console.error("\n❌ Parent repo has no remote configured.");
-      console.error("   Fix with:");
-      console.error("   git remote add origin <your-repo-url>");
-      console.error("   git push -u origin main\n");
-      process.exit(1);
+    // Smart push handling for parent repo
+    if (hasRemote()) {
+      try {
+        run("git push");
+        console.log("✅ Parent repo pointer pushed");
+      } catch (e) {
+        console.warn("\n⚠️  Failed to push parent repo pointer. Submodule is synced, but parent history is local.");
+      }
+    } else {
+      console.log("\nℹ️  Skipping parent push: No remote configured.");
+      console.log("   (Submodule was successfully updated and pushed)");
     }
 
-    console.log("✅ Sync complete");
+    console.log("\n✨ Sync complete");
   });
 
 program
@@ -185,17 +198,20 @@ program
       console.log("→ No changes to parent commit");
     }
 
-    try {
-      run("git push");
-    } catch (e) {
-      console.error("\n❌ Parent repo has no remote configured.");
-      console.error("   Fix with:");
-      console.error("   git remote add origin <your-repo-url>");
-      console.error("   git push -u origin main");
-      process.exit(1);
+    // Smart push handling for parent repo
+    if (hasRemote()) {
+      try {
+        run("git push");
+        console.log("✅ Parent repo pointer updated");
+      } catch (e) {
+        console.warn("\n⚠️  Failed to push parent repo pointer. Hub was updated, but parent history is local.");
+      }
+    } else {
+      console.log("\nℹ️  Skipping parent push: No remote configured.");
+      console.log("   (Document Hub was successfully updated and pushed)");
     }
 
-    console.log("✅ Successfully contributed to document hub");
+    console.log("\n✨ Successfully contributed to document hub");
   });
 
 program
