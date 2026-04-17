@@ -1,14 +1,20 @@
 # dh
 
+![Made in South Africa](https://shields.io)
+
 **Sparse Document Hub CLI** — repo level management for docs & personal playbook across projects.
 
 Create a central `my-stack-playbook` or `my-docuhub` repo. Linked into every project via git submodule. Zero duplication.
-Allow agents to edit documents in .documents/ and use `dh sync` to keep the central hub updated. Parent repository pointer updates are handled gracefully and do not require a remote.
+
+Allow your agents to edit documents in .documents/ and use `dh sync` to keep the central hub updated.
+
+Parent repository pointer updates are handled gracefully and do not require a remote.
 
 ## Features
 
 - `dh init` — add the dochub submodule + AGENTS.md instructions
 - `dh sync` — update & pull latest playbook
+- `dh update` — non-destructive pull
 - `dh contribute` — push new patterns back to the hub
 - `dh search` - search your .documents using grep
 - `dh add-pattern <name>` — create a new pattern template
@@ -20,7 +26,7 @@ Allow agents to edit documents in .documents/ and use `dh sync` to keep the cent
 npm install -g @ubuntupunk/dh
 ```
 
-# In your working repo``
+# In your working repo
 
 dh init → sets up submodule + adds note to AGENTS.md
 dh add-pattern foo → creates markdown with .md suffix, no need to add it.
@@ -32,11 +38,9 @@ dh search foo
 
 export DOC_HUB_REPO="https://github.com/yourusername/my-stack-playbook.git"
 
-````
+```bash
+# Recommended Hub Structure (my-stack-playbook)
 
-Recommended Hub Structure (my-stack-playbook)
-
-```text
 .documents/
 ├── README.md
 ├── core/
@@ -44,7 +48,7 @@ Recommended Hub Structure (my-stack-playbook)
 ├── templates/
 ├── divergences/
 └── decisions/
-````
+```
 
 ## Why this exists
 
