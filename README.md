@@ -1,6 +1,7 @@
 # dh
-
-![Made in South Africa](https://shields.io)
+<a href="https://github.com/pedromxavier/flag-badges">
+    <img src="https://raw.githubusercontent.com/pedromxavier/flag-badges/main/badges/ZA.svg" alt="made in za">
+</a>
 
 **Sparse Document Hub CLI** — repo level management for docs & personal playbook across projects.
 
