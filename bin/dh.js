@@ -168,13 +168,12 @@ program
   .argument("[message]", "Commit message", "update from project")
   .option("-d, --dir <name>", "Directory name", DEFAULT_DIR)
   .action((message, options) => {
-    const dir = options.dir;
-    const cwd = ensureProjectRoot(dir);
+  const dir = options.dir;
+  ensureProjectRoot(dir);
 
-    console.log(`Contributing changes from .documents`);
+  console.log(`Contributing changes from .documents`);
 
-    // 1. Work inside the submodule
-    process.chdir(dir);
+  process.chdir(dir);
     run("git add -A");
     try {
       run(`git commit -m "${message}"`);
@@ -183,29 +182,7 @@ program
     }
     run("git push origin main");
 
-    // 2. Update parent repo
-    process.chdir(cwd); // go back to root
-    run(`git add ${dir}`);
-    try {
-      run(`git commit -m "chore(docs): update .documents (${message})"`);
-    } catch (e) {
-      console.log("No changes to parent commit");
-    }
-
-    // Smart push handling for parent repo
-    if (hasRemote()) {
-      try {
-        run("git push");
-        console.log("Parent repo pointer updated");
-      } catch (e) {
-        console.warn("\nFailed to push parent repo pointer. Hub was updated, but parent history is local.");
-      }
-    } else {
-      console.log("\nSkipping parent push: No remote configured.");
-      console.log("   (Document Hub was successfully updated and pushed)");
-    }
-
-    console.log("\nSuccessfully contributed to document hub");
+  console.log("\nSuccessfully contributed to document hub");
   });
 
 program
