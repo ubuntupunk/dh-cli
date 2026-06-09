@@ -58,6 +58,24 @@ export DOC_HUB_REPO="https://github.com/yourusername/my-stack-playbook.git"
 └── decisions/
 ```
 
+## Troubleshooting
+
+### `dh sync` interrupted mid-push
+
+If `dh sync` is interrupted after committing local changes but before pushing, running it again is safe and idempotent. It will:
+
+1. Pull from remote (no-op if already up to date)
+2. Attempt to commit again — skips with "No changes in submodule" if nothing new
+3. Push any pending local commits in `.documents`
+4. Update and push the parent repo's submodule pointer
+
+Alternatively, manually complete the interrupted push:
+
+```bash
+cd .documents && git push origin main
+cd .. && git add .documents && git commit -m "chore: update pointer" && git push
+```
+
 ## Why this exists
 
 I got tired of technical docs scattered across repos. Now everything lives in one place and is instantly available (and updatable) in every project.
