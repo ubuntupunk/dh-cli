@@ -1,6 +1,5 @@
 # dh
 
-
 [![GitHub](https://img.shields.io/badge/GitHub-ubuntupunk/dh--cli-blue)](https://github.com/ubuntupunk/dh-cli)
 [![License](https://img.shields.io/badge/License-GPL-green.svg)](LICENSE)
 
@@ -24,6 +23,12 @@ Parent repository pointer updates are handled gracefully and do not require a re
 - `dh contribute` — push new patterns back to the hub
 - `dh search` - search your .documents using grep
 - `dh add-pattern <name>` — create a new pattern template
+
+## Prerequisites
+
+- **Node.js** (for the CLI itself)
+- **Git** (for submodule operations)
+- **GitHub CLI** (`gh`) — required for authentication with HTTPS remotes. Install via `brew install gh`, `sudo apt install gh`, or [gh cli install docs](https://github.com/cli/cli#installation). Then authenticate: `gh auth login`
 
 ## Installation
 
@@ -59,6 +64,27 @@ export DOC_HUB_REPO="https://github.com/yourusername/my-stack-playbook.git"
 ```
 
 ## Troubleshooting
+
+## `dh sync` requests login
+
+dh sync calls the official gh tool, if you are not logged into github, you may run into this:
+
+```bash
+
+Running from project root
+--- Updating from remote ---
+→ git submodule update --remote --merge .documents
+--- Committing changes in .documents ---
+→ git add -A
+→ git commit -m "added README"
+[main 3fd2ddd] added README
+ 1 file changed, 27 insertions(+)
+ create mode 100644 README.md
+→ git push origin main
+Username for 'https://github.com':
+```
+
+Remedy: make sure you are authorised via `gh auth login`
 
 ### `dh sync` interrupted mid-push
 
