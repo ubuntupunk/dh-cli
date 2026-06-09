@@ -28,7 +28,7 @@ Parent repository pointer updates are handled gracefully and do not require a re
 
 - **Node.js** (for the CLI itself)
 - **Git** (for submodule operations)
-- **GitHub CLI** (`gh`) — required for authentication with HTTPS remotes. Install via `brew install gh`, `sudo apt install gh`, or [gh cli install docs](https://github.com/cli/cli#installation). Then authenticate: `gh auth login`
+- **SSH keys** set up with GitHub (recommended) — or **GitHub CLI** (`gh`) for HTTPS authentication
 
 ## Installation
 
@@ -49,7 +49,13 @@ dh search foo
 
 # Set once in ~/.zshrc / ~/.bashrc
 
-export DOC_HUB_REPO="https://github.com/yourusername/my-stack-playbook.git"
+```bash
+# SSH (recommended — requires SSH keys set up with GitHub)
+export DOC_HUB_REPO="git@github.com:yourusername/my-stack-playbook.git"
+
+# HTTPS alternative (requires gh auth login or a credential helper)
+# export DOC_HUB_REPO="https://github.com/yourusername/my-stack-playbook.git"
+```
 
 ```bash
 # Recommended Hub Structure (my-stack-playbook)
@@ -65,26 +71,20 @@ export DOC_HUB_REPO="https://github.com/yourusername/my-stack-playbook.git"
 
 ## Troubleshooting
 
-## `dh sync` requests login
+### `dh sync` requests login
 
-dh sync calls the official gh tool, if you are not logged into github, you may run into this:
+This happens when using an HTTPS remote without a credential helper configured. Options:
+
+- **Switch to SSH** (recommended): Set `DOC_HUB_REPO` to an SSH URL (see above).
+- **Use `gh`**: Run `gh auth login` to authenticate, then `gh auth setup-git` to configure git to use your token.
+- **Use a PAT**: Create a [GitHub personal access token](https://github.com/settings/tokens) and use a credential helper like `git config --global credential.helper store`.
+
+You'll see something like:
 
 ```bash
-
-Running from project root
---- Updating from remote ---
-→ git submodule update --remote --merge .documents
---- Committing changes in .documents ---
-→ git add -A
-→ git commit -m "added README"
-[main 3fd2ddd] added README
- 1 file changed, 27 insertions(+)
- create mode 100644 README.md
 → git push origin main
 Username for 'https://github.com':
 ```
-
-Remedy: make sure you are authorised via `gh auth login`
 
 ### `dh sync` interrupted mid-push
 

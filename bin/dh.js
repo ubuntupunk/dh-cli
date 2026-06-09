@@ -7,7 +7,7 @@ const path = require("path");
 
 const DOC_HUB_REPO =
   process.env.DOC_HUB_REPO ||
-  "https://github.com/yourusername/my-stack-playbook.git";
+  "git@github.com:yourusername/my-stack-playbook.git";
 const DEFAULT_DIR = ".documents";
 
 function run(cmd) {
