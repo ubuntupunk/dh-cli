@@ -6,7 +6,7 @@
     "dh": "bin/dh.js"
   },
   "scripts": {
-    "link": "npm link"
+    "link": "pnpm install -g ."
   },
   "keywords": [
     "git",
